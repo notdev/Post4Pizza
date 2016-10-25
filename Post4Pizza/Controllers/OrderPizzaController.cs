@@ -9,7 +9,7 @@ using Post4Pizza.PizzaProviders;
 
 namespace Post4Pizza.Controllers
 {
-    public class PizzaController : ApiController
+    public class OrderPizzaController : ApiController
     {
         [HttpPost]
         [Route("Api/OrderPizza")]

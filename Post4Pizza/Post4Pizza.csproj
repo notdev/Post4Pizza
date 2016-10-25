@@ -120,7 +120,7 @@
     <Compile Include="Exceptions\PizzaProviderException.cs" />
     <Compile Include="PersistentSessionHttpClient.cs" />
     <Compile Include="PizzaProviders\CarusoPizzaProvider.cs" />
-    <Compile Include="Controllers\PizzaController.cs" />
+    <Compile Include="Controllers\OrderPizzaController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
