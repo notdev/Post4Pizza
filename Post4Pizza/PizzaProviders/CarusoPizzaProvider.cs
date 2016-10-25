@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -10,16 +9,6 @@ namespace Post4Pizza.PizzaProviders
     public class CarusoPizzaProvider : IPizzaProvider
     {
         private PersistentSessionHttpClient httpClient;
-        private string orderToken;
-
-        private int EpochTimeStampUtc
-        {
-            get
-            {
-                var unixTimestamp = (int) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-                return unixTimestamp;
-            }
-        }
 
         public string ProviderName => "CarusoPizzaBrno";
 
@@ -28,6 +17,12 @@ namespace Post4Pizza.PizzaProviders
             httpClient = LoginToPizzaProvider(username, password);
             pizzaNames.ForEach(AddToCart);
             GetCartItems();
+            ConfirmOrder();
+        }
+
+        private void ConfirmOrder()
+        {
+            throw new System.NotImplementedException();
         }
 
         private PersistentSessionHttpClient LoginToPizzaProvider(string username, string password)
@@ -53,19 +48,9 @@ namespace Post4Pizza.PizzaProviders
                 throw new PizzaProviderException($"Failed to login user '{username}'. Check that password is correct, try to log via web on {loginPage}");
             }
 
-            orderToken = GetToken(content);
-
             DebugContent.WriteToHtmlFile(content);
 
             return client;
-        }
-
-        private string GetToken(string webPageString)
-        {
-            const string pattern = "token = '.{32}";
-            var token = Regex.Match(webPageString, pattern).Value;
-            var cleanToken = token.Substring(9);
-            return cleanToken;
         }
 
         private string SearchForPizza(string pizzaName)
