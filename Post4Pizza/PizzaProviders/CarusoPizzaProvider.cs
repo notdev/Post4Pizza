@@ -11,6 +11,7 @@ namespace Post4Pizza.PizzaProviders
         private PersistentSessionHttpClient httpClient;
 
         public string ProviderName => "CarusoPizzaBrno";
+        public string ProviderUrl => "http://www.carusopizza.cz/";
 
         public void OrderPizza(string username, string password, List<string> pizzaNames)
         {

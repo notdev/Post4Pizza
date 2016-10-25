@@ -5,6 +5,7 @@ namespace Post4Pizza.PizzaProviders
     internal interface IPizzaProvider
     {
         string ProviderName { get; }
+        string ProviderUrl { get; }
 
         /// <summary>
         ///     Order list of Pizzas

@@ -15,7 +15,7 @@ namespace Post4Pizza.Controllers
         [Route("Api/OrderPizza")]
         public HttpResponseMessage OrderPizza(string pizzaProviderName, string userName, string password, List<string> pizzasToOrder)
         {
-            var provider = GetPizzaProvider(pizzaProviderName);
+            var provider = FindPizzaProvider(pizzaProviderName);
             if (provider == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.BadRequest) {Content = new StringContent($"Failed to order. Did not find provider '{pizzaProviderName}'")};
@@ -37,15 +37,29 @@ namespace Post4Pizza.Controllers
             return new HttpResponseMessage(HttpStatusCode.OK);
         }
 
-        private IPizzaProvider GetPizzaProvider(string providerName)
+        [HttpGet]
+        [Route("Api/OrderPizza/Providers")]
+        public Dictionary<string,string> GetAvailablePizzaProviders()
+        {
+            var allproviders = GetAllPizzaProviders();
+            return allproviders.ToDictionary(provider => provider.ProviderName, provider => provider.ProviderUrl);
+        }
+
+
+        private IEnumerable<IPizzaProvider> GetAllPizzaProviders()
         {
             var pizzaProviderInterfaces = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
                 .Where(t => t.GetInterfaces().Contains(typeof(IPizzaProvider)));
 
-            var modules = pizzaProviderInterfaces.Select(type => (IPizzaProvider) Activator.CreateInstance(type));
+            var providers = pizzaProviderInterfaces.Select(type => (IPizzaProvider) Activator.CreateInstance(type));
+            return providers;
+        }
 
-            var provider = modules.FirstOrDefault(m => m.ProviderName == providerName);
+        private IPizzaProvider FindPizzaProvider(string providerName)
+        {
+            var allProviders = GetAllPizzaProviders();
+            var provider = allProviders.FirstOrDefault(m => m.ProviderName == providerName);
             return provider;
         }
     }
