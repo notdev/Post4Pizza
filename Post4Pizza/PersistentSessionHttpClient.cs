@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -56,10 +55,17 @@ namespace Post4Pizza
             return response;
         }
 
+        public string PostAndGetString(string url, IEnumerable<KeyValuePair<string, string>> parameters)
+        {
+            var response = Post(url, parameters);
+            var responseContentAsString = response.Content.ReadAsStringAsync().Result;
+            return responseContentAsString;
+        }
+
         public HttpResponseMessage Post(string url, IEnumerable<KeyValuePair<string, string>> parameters, List<string> acceptHeaders, IEnumerable<KeyValuePair<string, string>> genericHeaders)
         {
             HttpContent content = new FormUrlEncodedContent(parameters);
-            
+
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(url),
