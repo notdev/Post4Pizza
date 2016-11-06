@@ -13,7 +13,7 @@ namespace Post4Pizza
             Directory.CreateDirectory(logDirectory);
             Log.Logger = new LoggerConfiguration()
                .MinimumLevel.Debug()
-               .WriteTo.RollingFile(Path.Combine(logDirectory, "log.txt"))
+               .WriteTo.RollingFile(Path.Combine(logDirectory, "log.txt"), fileSizeLimitBytes: 104857600)
                .CreateLogger();
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
