@@ -6,7 +6,9 @@ namespace Post4Pizza
     {
         public static void WriteToHtmlFile(string content)
         {
+#if DEBUG
             File.WriteAllText("C:\\!work\\test.html", content);
+#endif
         }
     }
 }
