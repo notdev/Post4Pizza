@@ -141,6 +141,7 @@
     </Compile>
     <Compile Include="DebugContent.cs" />
     <Compile Include="PizzaProviders\IPizzaProvider.cs" />
+    <Compile Include="PizzaProviders\Model\CarusoCustomerData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

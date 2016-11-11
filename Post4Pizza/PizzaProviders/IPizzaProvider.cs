@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+#pragma warning disable 1573
 
 namespace Post4Pizza.PizzaProviders
 {
