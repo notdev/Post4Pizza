@@ -10,10 +10,11 @@ namespace Post4Pizza.PizzaProviders
     public class CarusoPizzaProvider : IPizzaProvider
     {
         private const string ProviderUrlConst = "https://www.carusopizza.cz/";
+
         private readonly string loginPage = $"{ProviderUrlConst}cs/login";
         private readonly string opcUrl = $"{ProviderUrlConst}cs/address?back=order-opc.php";
-
         private readonly string orderUrl = $"{ProviderUrlConst}cs/quick-order";
+
         private string email;
         private PersistentSessionHttpClient httpClient;
 
