@@ -176,7 +176,7 @@ namespace Post4Pizza.PizzaProviders
             var orderButtonNode = document.DocumentNode.SelectSingleNode("//ul[@class='product-buttons']/li[@class='cart-button-btn']/a[contains(@class,'exclusive')]");
             if (orderButtonNode == null)
             {
-                throw new PizzaProviderException($"Failed to find order button for pizza {pizzaName}. It is possible that the pizzeria is closed at the moment.");
+                throw new PizzaProviderException($"Failed to find order button for pizza {pizzaName}. It is possible that the pizzeria is closed at the moment or that there are no pizzas with name {pizzaName}.");
             }
             var orderLink = orderButtonNode.Attributes["href"].Value;
             orderLink = orderLink.Replace("&amp;", "&");
