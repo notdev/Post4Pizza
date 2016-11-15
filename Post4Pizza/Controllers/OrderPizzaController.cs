@@ -18,15 +18,31 @@ namespace Post4Pizza.Controllers
         public HttpResponseMessage OrderPizza(string pizzaProviderName, string userName, string password, List<string> pizzasToOrder)
         {
             var requestIp = HttpContext.Current != null ? HttpContext.Current.Request.UserHostAddress : string.Empty;
-
             Log.Information($"Order received from IP {requestIp}.");
+
+            if (string.IsNullOrEmpty(pizzaProviderName))
+            {
+                return ReturnBadRequest("Empty provider name");
+            }
+            if (string.IsNullOrEmpty(userName))
+            {
+                return ReturnBadRequest("Empty username");
+            }
+            if (string.IsNullOrEmpty(password))
+            {
+                return ReturnBadRequest("Empty password");
+            }
+            if (pizzasToOrder == null || pizzasToOrder.Count == 0)
+            {
+                return ReturnBadRequest("No pizzas in request");
+            }
 
             var provider = FindPizzaProvider(pizzaProviderName);
             if (provider == null)
             {
                 string errorMessage = $"Failed to order. Did not find provider '{pizzaProviderName}'";
                 Log.Error(errorMessage);
-                return new HttpResponseMessage(HttpStatusCode.BadRequest) {Content = new StringContent(errorMessage)};
+                return ReturnBadRequest(errorMessage);
             }
 
             try
@@ -36,7 +52,7 @@ namespace Post4Pizza.Controllers
             catch (PizzaProviderException ex)
             {
                 Log.Error(ex.ToString());
-                return new HttpResponseMessage(HttpStatusCode.BadRequest) {Content = new StringContent($"Failed to order. Error: '{ex.Message}'")};
+                return ReturnBadRequest($"Failed to order. Error: '{ex.Message}'");
             }
             catch (Exception ex)
             {
@@ -72,6 +88,11 @@ namespace Post4Pizza.Controllers
             var allProviders = GetAllPizzaProviders();
             var provider = allProviders.FirstOrDefault(m => m.ProviderName == providerName);
             return provider;
+        }
+
+        private HttpResponseMessage ReturnBadRequest(string message)
+        {
+            return new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent(message) };
         }
     }
 }
