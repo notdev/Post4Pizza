@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
@@ -32,9 +33,9 @@ namespace Post4Pizza.PizzaProviders
             sessionToken = GetToken();
 
             var orderData = GetOrderData();
-            if ((int) orderData.Summary.total_products != pizzaNames.Count)
+            if (orderData.Summary.products.Count != pizzaNames.Count)
             {
-                throw new PizzaProviderException($"Failed to order. Count of products after ordering was not equal to count of ordered pizzas. Ordered {pizzaNames.Count}. Products in cart count was {orderData.Summary.total_products}");
+                throw new PizzaProviderException($"Failed to order. Incorrect count of products. Cart items: {string.Join(", ",orderData.Summary.products.Select(p => p.legend))}. Expected items: {string.Join(", ", pizzaNames)}");
             }
 
             ConfirmOrder(orderData.Summary.Delivery);
@@ -81,7 +82,7 @@ namespace Post4Pizza.PizzaProviders
                 new KeyValuePair<string, string>("city", deliveryInfo.city),
                 new KeyValuePair<string, string>("phone", deliveryInfo.phone),
                 new KeyValuePair<string, string>("id_country", deliveryInfo.id_country),
-                new KeyValuePair<string, string>("id_country_invoice", "16"),
+                new KeyValuePair<string, string>("id_country_invoice", deliveryInfo.id_country),
                 new KeyValuePair<string, string>("customer_lastname", deliveryInfo.lastname),
                 new KeyValuePair<string, string>("customer_firstname", deliveryInfo.firstname),
                 new KeyValuePair<string, string>("alias", deliveryInfo.alias),
