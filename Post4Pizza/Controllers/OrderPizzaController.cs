@@ -15,40 +15,40 @@ namespace Post4Pizza.Controllers
     {
         [HttpPost]
         [Route("Api/OrderPizza")]
-        public HttpResponseMessage OrderPizza(string pizzaProviderName, string userName, string password, List<string> pizzasToOrder)
+        public HttpResponseMessage OrderPizza(Order order)
         {
             var requestIp = HttpContext.Current != null ? HttpContext.Current.Request.UserHostAddress : string.Empty;
             Log.Information($"Order received from IP {requestIp}.");
 
-            if (string.IsNullOrEmpty(pizzaProviderName))
+            if (string.IsNullOrEmpty(order.PizzaProviderName))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Empty provider name"));
             }
-            if (string.IsNullOrEmpty(userName))
+            if (string.IsNullOrEmpty(order.Username))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Empty username"));
             }
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(order.Password))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Empty username"));
             }
-            if ((pizzasToOrder == null) || (pizzasToOrder.Count == 0))
+            if ((order.Pizzas == null) || (order.Pizzas.Count == 0))
             {
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "No pizzas in request"));
             }
             try
             {
-                var provider = FindPizzaProvider(pizzaProviderName);
+                var provider = FindPizzaProvider(order.PizzaProviderName);
                 if (provider == null)
                 {
-                    string errorMessage = $"Failed to order. Did not find provider '{pizzaProviderName}'";
+                    string errorMessage = $"Failed to order. Did not find provider '{order.PizzaProviderName}'";
                     Log.Error(errorMessage);
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, errorMessage);
                 }
 
-                provider.OrderPizza(userName, password, pizzasToOrder);
+                provider.OrderPizza(order.Username, order.Password, order.Pizzas);
 
-                Log.Information($"Pizza ordered OK from provider {provider.ProviderName}. Pizzas ordered: {string.Join(", ", pizzasToOrder)}");
+                Log.Information($"Pizza ordered OK from provider {provider.ProviderName}. Pizzas ordered: {string.Join(", ", order.Pizzas)}");
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
             catch (PizzaProviderException ex)

@@ -132,6 +132,7 @@
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\Order.cs" />
     <Compile Include="Exceptions\PizzaProviderException.cs" />
     <Compile Include="PersistentSessionHttpClient.cs" />
     <Compile Include="PizzaProviders\CarusoPizzaProvider.cs" />
