@@ -22,46 +22,45 @@ namespace Post4Pizza.Controllers
 
             if (string.IsNullOrEmpty(pizzaProviderName))
             {
-                return ReturnBadRequest("Empty provider name");
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Empty provider name"));
             }
             if (string.IsNullOrEmpty(userName))
             {
-                return ReturnBadRequest("Empty username");
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Empty username"));
             }
             if (string.IsNullOrEmpty(password))
             {
-                return ReturnBadRequest("Empty password");
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Empty username"));
             }
-            if (pizzasToOrder == null || pizzasToOrder.Count == 0)
+            if ((pizzasToOrder == null) || (pizzasToOrder.Count == 0))
             {
-                return ReturnBadRequest("No pizzas in request");
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "No pizzas in request"));
             }
-
-            var provider = FindPizzaProvider(pizzaProviderName);
-            if (provider == null)
-            {
-                string errorMessage = $"Failed to order. Did not find provider '{pizzaProviderName}'";
-                Log.Error(errorMessage);
-                return ReturnBadRequest(errorMessage);
-            }
-
             try
             {
+                var provider = FindPizzaProvider(pizzaProviderName);
+                if (provider == null)
+                {
+                    string errorMessage = $"Failed to order. Did not find provider '{pizzaProviderName}'";
+                    Log.Error(errorMessage);
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, errorMessage);
+                }
+
                 provider.OrderPizza(userName, password, pizzasToOrder);
+
+                Log.Information($"Pizza ordered OK from provider {provider.ProviderName}. Pizzas ordered: {string.Join(", ", pizzasToOrder)}");
+                return Request.CreateResponse(HttpStatusCode.OK);
             }
             catch (PizzaProviderException ex)
             {
                 Log.Error(ex.ToString());
-                return ReturnBadRequest($"Failed to order. Error: '{ex.Message}'");
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, $"Failed to order. Error: '{ex.Message}'");
             }
             catch (Exception ex)
             {
                 Log.Error(ex.ToString());
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError) {Content = new StringContent($"Unhandled error occured. Error: '{ex}'")};
             }
-
-            Log.Information($"Pizza ordered OK from provider {provider.ProviderName}. Pizzas ordered: {string.Join(", ", pizzasToOrder)}");
-            return new HttpResponseMessage(HttpStatusCode.OK);
         }
 
         [HttpGet]
@@ -88,11 +87,6 @@ namespace Post4Pizza.Controllers
             var allProviders = GetAllPizzaProviders();
             var provider = allProviders.FirstOrDefault(m => m.ProviderName == providerName);
             return provider;
-        }
-
-        private HttpResponseMessage ReturnBadRequest(string message)
-        {
-            return new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent(message) };
         }
     }
 }
