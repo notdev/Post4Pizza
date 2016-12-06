@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
@@ -137,7 +138,11 @@ namespace Post4Pizza.PizzaProviders
         private void GetConfirmPage()
         {
             var url = "https://www.carusopizza.cz/cs/module/cashonpickup/validation";
-            httpClient.Get(url);
+            var result = httpClient.Get(url);
+            if (result.StatusCode == HttpStatusCode.MovedPermanently)
+            {
+                httpClient.Get(result.Headers.Location.ToString());
+            }
         }
 
         private PersistentSessionHttpClient LoginToPizzaProvider(string username, string password)
@@ -169,7 +174,7 @@ namespace Post4Pizza.PizzaProviders
         private string SearchForPizza(string pizzaName)
         {
             var url = $"{ProviderUrlConst}cs/search?search_query={pizzaName}";
-            var content = httpClient.Get(url);
+            var content = httpClient.GetString(url);
             DebugContent.WriteToHtmlFile(content);
 
             var document = new HtmlDocument();
@@ -187,13 +192,13 @@ namespace Post4Pizza.PizzaProviders
         private void AddToCart(string pizzaName)
         {
             var url = SearchForPizza(pizzaName);
-            var response = httpClient.Get(url);
+            var response = httpClient.GetString(url);
             DebugContent.WriteToHtmlFile(response);
         }
 
         private string GetToken()
         {
-            var cartPage = httpClient.Get("https://www.carusopizza.cz/cs/quick-order");
+            var cartPage = httpClient.GetString("https://www.carusopizza.cz/cs/quick-order");
             DebugContent.WriteToHtmlFile(cartPage);
 
             var tokenVariable = Regex.Match(cartPage, "var static_token = '.*'").Value;
