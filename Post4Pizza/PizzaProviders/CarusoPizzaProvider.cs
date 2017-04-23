@@ -14,8 +14,8 @@ namespace Post4Pizza.PizzaProviders
         private const string ProviderUrlConst = "https://www.carusopizza.cz/";
 
         private readonly string loginPage = $"{ProviderUrlConst}cs/login";
-        private readonly string opcUrl = $"{ProviderUrlConst}cs/address?back=order-opc.php";
-        private readonly string orderUrl = $"{ProviderUrlConst}cs/quick-order";
+        private readonly string opcUrl = $"{ProviderUrlConst}cs/adresa?back=order-opc.php";
+        private readonly string orderUrl = $"{ProviderUrlConst}cs/rychla-objednavka";
 
         private string email;
         private PersistentSessionHttpClient httpClient;
@@ -171,34 +171,50 @@ namespace Post4Pizza.PizzaProviders
             return client;
         }
 
+        private IEnumerable<CarusoPizza> GetPizzas(HtmlNode documentNode)
+        {
+            var pizzaNodes = documentNode.SelectNodes("//div[@class='product-container']");
+            foreach (var pizzaNode in pizzaNodes)
+            {
+                var name = pizzaNode.SelectSingleNode(".//h4[@class='name']").InnerText.ToLower();
+                name = name.Replace("\n", "").Replace("\t", "");
+                var addToCartUrl = pizzaNode.SelectSingleNode(".//div[@class='addtocart']/a").Attributes["href"].Value;
+                addToCartUrl = addToCartUrl.Replace("&amp;", "&");
+                yield return new CarusoPizza(name, addToCartUrl);
+            }
+        }
+
         private string SearchForPizza(string pizzaName)
         {
-            var url = $"{ProviderUrlConst}cs/search?search_query={pizzaName}";
+            pizzaName = pizzaName.ToLower();
+
+            var url = $"{ProviderUrlConst}cs/vyhledavani?search_query={pizzaName}";
             var content = httpClient.GetString(url);
             DebugContent.WriteToHtmlFile(content);
 
             var document = new HtmlDocument();
             document.LoadHtml(content);
-            var orderButtonNode = document.DocumentNode.SelectSingleNode("//ul[@class='product-buttons']/li[@class='cart-button-btn']/a[contains(@class,'exclusive')]");
-            if (orderButtonNode == null)
+            var pizzas = GetPizzas(document.DocumentNode).ToList();
+            var searched = pizzas.FirstOrDefault(p => p.Name == pizzaName);
+            
+            if (searched == null)
             {
                 throw new PizzaProviderException($"Failed to find order button for pizza {pizzaName}. It is possible that the pizzeria is closed at the moment or that there are no pizzas with name {pizzaName}.");
             }
-            var orderLink = orderButtonNode.Attributes["href"].Value;
-            orderLink = orderLink.Replace("&amp;", "&");
-            return orderLink;
+            
+            return searched.OrderUrl;
         }
 
         private void AddToCart(string pizzaName)
         {
-            var url = SearchForPizza(pizzaName);
-            var response = httpClient.GetString(url);
+            var addToCartUrl = SearchForPizza(pizzaName);
+            var response = httpClient.GetString(addToCartUrl);
             DebugContent.WriteToHtmlFile(response);
         }
 
         private string GetToken()
         {
-            var cartPage = httpClient.GetString("https://www.carusopizza.cz/cs/quick-order");
+            var cartPage = httpClient.GetString(orderUrl);
             DebugContent.WriteToHtmlFile(cartPage);
 
             var tokenVariable = Regex.Match(cartPage, "var static_token = '.*'").Value;
